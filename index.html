@@ -1,231 +1,163 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>Минималистичный сапёр · Босния</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: #1e1e1e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-            padding: 12px;
-            overflow: hidden;
-        }
-        .game-wrapper {
-            background: #2d2d2d;
-            border-radius: 24px;
-            padding: 20px 20px 24px;
-            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.7), inset 0 0 0 1px #3f3f3f;
-            max-width: 100%;
-            display: flex;
-            flex-direction: column;
-            max-height: 100vh;
-        }
-        .settings {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 18px;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            color: #e0e0e0;
-            background: #262626;
-            padding: 12px 18px;
-            border-radius: 60px;
-            box-shadow: inset 0 2px 5px #0a0a0a;
-            flex-shrink: 0;
-        }
-        .settings label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            color: #c0c0c0;
-        }
-        .settings input {
-            background: #1e1e1e;
-            border: 1px solid #444;
-            color: white;
-            font-weight: 600;
-            width: 68px;
-            padding: 8px 10px;
-            border-radius: 40px;
-            font-size: 15px;
-            text-align: center;
-            outline: none;
-            transition: border-color 0.15s, background 0.15s;
-            box-shadow: inset 0 2px 6px #0a0a0a;
-        }
-        .settings input:focus {
-            border-color: #6a9c78;
-            background: #1a2a1f;
-        }
-        .settings button {
-            background: #3a5e4b;
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 10px 22px;
-            border-radius: 40px;
-            font-size: 15px;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-            box-shadow: 0 6px 0 #1d2f24, 0 8px 12px rgba(0,0,0,0.4);
-            transform: translateY(-2px);
-            border: 1px solid #5c8b70;
-        }
-        .settings button:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #1d2f24, 0 5px 10px rgba(0,0,0,0.4);
-        }
-        .board-container {
-            display: flex;
-            justify-content: center;
-            overflow: auto;
-            flex: 1 1 auto;
-            min-height: 0;
-            border-radius: 16px;
-            padding: 6px;
-            background: #202020;
-            box-shadow: inset 0 0 0 1px #3a3a3a, inset 0 8px 12px rgba(0,0,0,0.6);
-            -webkit-overflow-scrolling: touch;
-            contain: strict;
-        }
-        .board {
-            display: grid;
-            gap: 3px;
-            background: #2d2d2d;
-            padding: 3px;
-            border-radius: 10px;
-            width: max-content;
-            height: max-content;
-            margin: auto;
-        }
-        .cell {
-            width: 36px;
-            height: 36px;
-            background: #404040;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 18px;
-            color: #ddd;
-            box-shadow: 0 3px 0 #1e1e1e, 0 4px 8px rgba(0,0,0,0.4);
-            transition: transform 0.05s, box-shadow 0.05s, background 0.1s, color 0.1s;
-            cursor: pointer;
-            border: none;
-            font-family: 'Segoe UI', monospace;
-            line-height: 1;
-            transform: translateY(-1px);
-            padding: 0;
-            will-change: transform;
-            contain: layout style paint;
-        }
-        .cell:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #1e1e1e, 0 3px 6px rgba(0,0,0,0.5);
-        }
-        .cell.revealed {
-            background: #2a2a2a;
-            box-shadow: inset 0 2px 5px #0f0f0f, 0 1px 0 #3a3a3a;
-            transform: translateY(1px);
-            color: #b0b0b0;
-            cursor: default;
-            font-size: 17px;
-        }
-        .cell.revealed:active {
-            transform: translateY(1px);
-            box-shadow: inset 0 2px 5px #0f0f0f;
-        }
-        .cell.flagged {
-            background: #3d3d2a;
-            box-shadow: 0 3px 0 #1e1e1e, 0 0 0 1px #b8860b inset;
-            font-size: 22px;
-            color: #e6b422;
-        }
-        .cell.mine-exploded {
-            background: #6b2e2e;
-            box-shadow: 0 3px 0 #3a1a1a, 0 0 0 2px #b33 inset;
-            color: #ffb3b3;
-        }
-        .bosnia-flag {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-top: 18px;
-            animation: fadeIn 0.5s ease;
-            flex-shrink: 0;
-        }
-        .flag-svg {
-            width: 160px;
-            height: auto;
-            filter: drop-shadow(0 12px 15px rgba(0,0,0,0.6));
-            border-radius: 6px;
-            box-shadow: 0 0 0 2px #4f4f4f;
-        }
-        .flag-caption {
-            color: #c0c0c0;
-            font-size: 15px;
-            margin-top: 8px;
-            font-weight: 500;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            opacity: 0.8;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .hidden {
-            display: none !important;
-        }
-        @media (max-width: 600px) {
-            .cell { width: 32px; height: 32px; font-size: 16px; border-radius: 6px; }
-            .board { gap: 2px; padding: 2px; }
-            .settings { padding: 10px 12px; gap: 8px; }
-            .settings label { font-size: 13px; }
-            .settings input { width: 58px; padding: 6px 8px; font-size: 14px; }
-            .settings button { padding: 8px 18px; font-size: 14px; }
-            .flag-svg { width: 130px; }
-            .game-wrapper { padding: 14px 14px 18px; border-radius: 18px; }
-        }
-        @media (max-width: 380px) {
-            .cell { width: 28px; height: 28px; font-size: 14px; }
-            .flag-svg { width: 110px; }
-        }
-        .status-message {
-            text-align: center;
-            color: #aaa;
-            margin: 10px 0 0;
-            font-size: 15px;
-            min-height: 22px;
-            font-weight: 500;
-            flex-shrink: 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+<title>Минималистичный сапёр · Босния</title>
+<style>
+    * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body {
+        margin: 0; padding: 0; height: 100%;
+        background: #1e1e1e;
+        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+        overflow: hidden;
+    }
+    body {
+        display: flex; align-items: center; justify-content: center;
+        padding: 8px;
+    }
+    .game-wrapper {
+        background: #2d2d2d;
+        border-radius: 20px;
+        padding: 14px 14px 18px;
+        box-shadow: 0 20px 35px rgba(0,0,0,0.7), inset 0 0 0 1px #3f3f3f;
+        max-width: 100%; max-height: 100%;
+        display: flex; flex-direction: column;
+        gap: 10px;
+    }
+    .settings {
+        display: flex; flex-wrap: wrap; gap: 8px 12px;
+        align-items: center; justify-content: center;
+        color: #e0e0e0; background: #262626;
+        padding: 8px 14px; border-radius: 60px;
+        box-shadow: inset 0 2px 5px #0a0a0a;
+        flex-shrink: 0;
+    }
+    .settings label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 14px; font-weight: 500; color: #c0c0c0;
+    }
+    .settings input {
+        background: #1e1e1e; border: 1px solid #444; color: white;
+        font-weight: 600; width: 56px; padding: 6px 8px;
+        border-radius: 40px; font-size: 14px; text-align: center;
+        outline: none; box-shadow: inset 0 2px 6px #0a0a0a;
+    }
+    .settings input:focus { border-color: #6a9c78; background: #1a2a1f; }
+    .settings button {
+        background: #3a5e4b; border: 1px solid #5c8b70; color: white;
+        font-weight: 600; padding: 8px 18px; border-radius: 40px;
+        font-size: 14px; letter-spacing: 0.5px; cursor: pointer;
+        box-shadow: 0 5px 0 #1d2f24, 0 7px 10px rgba(0,0,0,0.4);
+        transform: translateY(-2px);
+        transition: transform 0.08s, box-shadow 0.08s;
+    }
+    .settings button:active {
+        transform: translateY(3px);
+        box-shadow: 0 2px 0 #1d2f24, 0 4px 8px rgba(0,0,0,0.4);
+    }
+    .board-container {
+        display: flex; justify-content: center; align-items: flex-start;
+        overflow: auto;
+        flex: 1 1 auto; min-height: 0;
+        border-radius: 12px; padding: 4px;
+        background: #202020;
+        box-shadow: inset 0 0 0 1px #3a3a3a, inset 0 8px 12px rgba(0,0,0,0.6);
+        -webkit-overflow-scrolling: touch;
+    }
+    .board {
+        display: grid;
+        gap: 3px;
+        background: #2d2d2d;
+        padding: 3px;
+        border-radius: 8px;
+        width: max-content;
+        height: max-content;
+        margin: auto;
+    }
+    .cell {
+        width: 34px; height: 34px;
+        background: #404040;
+        border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 17px;
+        color: #ddd;
+        box-shadow: 0 3px 0 #1e1e1e, 0 4px 8px rgba(0,0,0,0.4);
+        cursor: pointer;
+        border: none;
+        font-family: 'Segoe UI', monospace;
+        line-height: 1;
+        padding: 0;
+        transition: transform 0.05s, box-shadow 0.05s, background 0.1s, color 0.1s;
+        will-change: transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+    .cell:active { transform: translateY(2px); box-shadow: 0 1px 0 #1e1e1e, 0 3px 6px rgba(0,0,0,0.5); }
+    .cell.revealed {
+        background: #2a2a2a;
+        box-shadow: inset 0 2px 5px #0f0f0f, 0 1px 0 #3a3a3a;
+        transform: translateY(1px);
+        color: #b0b0b0; cursor: default; font-size: 16px;
+    }
+    .cell.revealed:active { transform: translateY(1px); box-shadow: inset 0 2px 5px #0f0f0f; }
+    .cell.flagged {
+        background: #3d3d2a;
+        box-shadow: 0 3px 0 #1e1e1e, 0 0 0 1px #b8860b inset;
+        font-size: 20px; color: #e6b422;
+    }
+    .cell.mine-exploded {
+        background: #6b2e2e;
+        box-shadow: 0 3px 0 #3a1a1a, 0 0 0 2px #b33 inset;
+        color: #ffb3b3;
+    }
+    .bosnia-flag {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        animation: fadeIn 0.5s ease;
+        flex-shrink: 0;
+    }
+    .flag-svg {
+        width: 140px; height: auto;
+        filter: drop-shadow(0 10px 12px rgba(0,0,0,0.6));
+        border-radius: 5px; box-shadow: 0 0 0 2px #4f4f4f;
+    }
+    .flag-caption {
+        color: #c0c0c0; font-size: 13px; margin-top: 6px;
+        font-weight: 500; letter-spacing: 1px;
+        text-transform: uppercase; opacity: 0.8;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .hidden { display: none !important; }
+    @media (max-width: 600px) {
+        .cell { width: 30px; height: 30px; font-size: 15px; border-radius: 6px; }
+        .board { gap: 2px; padding: 2px; }
+        .settings { padding: 6px 10px; gap: 6px 10px; }
+        .settings label { font-size: 12px; gap: 4px; }
+        .settings input { width: 48px; padding: 5px 6px; font-size: 13px; }
+        .settings button { padding: 6px 14px; font-size: 13px; }
+        .flag-svg { width: 110px; }
+        .game-wrapper { padding: 10px 10px 14px; border-radius: 16px; }
+    }
+    @media (max-width: 380px) {
+        .cell { width: 26px; height: 26px; font-size: 13px; }
+        .flag-svg { width: 90px; }
+    }
+    .status-message {
+        text-align: center; color: #aaa;
+        font-size: 14px; min-height: 18px;
+        font-weight: 500; flex-shrink: 0;
+    }
+</style>
 </head>
 <body>
 <div class="game-wrapper">
     <div class="settings">
-        <label>Ширина <input type="number" id="widthInput" min="2" max="96" value="9" inputmode="numeric"></label>
-        <label>Высота <input type="number" id="heightInput" min="2" max="96" value="9" inputmode="numeric"></label>
-        <label>Мин <input type="number" id="minesInput" min="1" max="95" value="10" inputmode="numeric"></label>
+        <label>Ш <input type="number" id="widthInput" min="2" max="96" value="9" inputmode="numeric"></label>
+        <label>В <input type="number" id="heightInput" min="2" max="96" value="9" inputmode="numeric"></label>
+        <label>М <input type="number" id="minesInput" min="1" max="95" value="10" inputmode="numeric"></label>
         <button id="newGameBtn" type="button">Новая игра</button>
     </div>
     <div class="board-container" id="boardContainer">
@@ -254,7 +186,6 @@
 (function(){
     'use strict';
 
-    // ---- DOM ----
     const boardEl = document.getElementById('board');
     const boardContainer = document.getElementById('boardContainer');
     const widthInput = document.getElementById('widthInput');
@@ -264,57 +195,41 @@
     const statusMessage = document.getElementById('statusMessage');
     const bosniaFlag = document.getElementById('bosniaFlag');
 
-    // ---- Состояние ----
     let cols = 9, rows = 9, minesCount = 10;
-    let mine = null;        // Uint8Array: 1 = мина
-    let revealed = null;    // Uint8Array: 1 = открыта
-    let flagged = null;     // Uint8Array: 1 = флаг
-    let adjacent = null;    // Uint8Array: число соседних мин
-    let cellEls = null;     // Array<HTMLButtonElement> — DOM-элементы ячеек
-
+    let mine, revealed, flagged, adjacent, cellEls;
     let gameOver = false, gameWon = false;
     let flagsPlaced = 0, revealedCount = 0;
     let totalCells = 0;
     let firstMoveDone = false;
 
-    // ---- Цвета цифр (статичный массив) ----
-    const NUM_COLORS = ['#6a8caf', '#7f9f7f', '#b38b6d', '#9b6b8c', '#8f6b5e', '#5f7e8c', '#9e8e6b', '#9e6b6b'];
+    const NUM_COLORS = ['#6a8caf','#7f9f7f','#b38b6d','#9b6b8c','#8f6b5e','#5f7e8c','#9e8e6b','#9e6b6b'];
 
     // ---- Аудио ----
-    let audioCtx = null;
-    let audioBusy = false;
-
+    let audioCtx = null, audioBusy = false;
     const MELODY = [
-        [523.25, 0.12], [659.25, 0.12], [783.99, 0.12], [1046.50, 0.18],
-        [783.99, 0.12], [1046.50, 0.25], [659.25, 0.12], [783.99, 0.12],
-        [1046.50, 0.18], [1318.51, 0.30], [1046.50, 0.12], [1318.51, 0.40]
+        [523.25,0.12],[659.25,0.12],[783.99,0.12],[1046.50,0.18],
+        [783.99,0.12],[1046.50,0.25],[659.25,0.12],[783.99,0.12],
+        [1046.50,0.18],[1318.51,0.30],[1046.50,0.12],[1318.51,0.40]
     ];
-
-    function ensureAudio() {
-        if (!audioCtx) {
-            const AC = window.AudioContext || window.webkitAudioContext;
-            if (!AC) return null;
-            audioCtx = new AC();
-        }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        return audioCtx;
-    }
-
     function play8Bit() {
         if (audioBusy) return;
-        const ctx = ensureAudio();
-        if (!ctx) return;
+        try {
+            if (!audioCtx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                audioCtx = new AC();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        } catch(e) { return; }
         audioBusy = true;
-
-        let t = ctx.currentTime + 0.02;
-        const master = ctx.createGain();
-        master.gain.value = 0.10;
-        master.connect(ctx.destination);
-
+        let t = audioCtx.currentTime + 0.02;
+        const master = audioCtx.createGain();
+        master.gain.value = 0.09;
+        master.connect(audioCtx.destination);
         for (let i = 0; i < MELODY.length; i++) {
             const freq = MELODY[i][0], dur = MELODY[i][1];
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
             osc.type = 'square';
             osc.frequency.setValueAtTime(freq, t);
             g.gain.setValueAtTime(0.9, t);
@@ -324,42 +239,34 @@
             osc.start(t); osc.stop(t + dur);
             t += dur;
         }
-        const total = t - ctx.currentTime;
+        const total = t - audioCtx.currentTime;
         setTimeout(() => { audioBusy = false; }, total * 1000 + 150);
     }
 
-    // ---- Утилиты ----
     function clamp(v, min, max) { return v < min ? min : (v > max ? max : v); }
 
     function readSettings() {
-        cols = clamp(parseInt(widthInput.value, 10) || 9, 2, 96);
-        rows = clamp(parseInt(heightInput.value, 10) || 9, 2, 96);
-        const maxMines = Math.min(95, cols * rows - 1);
-        minesCount = clamp(parseInt(minesInput.value, 10) || 10, 1, maxMines);
+        cols = clamp(parseInt(widthInput.value,10) || 9, 2, 96);
+        rows = clamp(parseInt(heightInput.value,10) || 9, 2, 96);
+        const maxMines = Math.min(95, cols*rows - 1);
+        minesCount = clamp(parseInt(minesInput.value,10) || 10, 1, maxMines);
         widthInput.value = cols;
         heightInput.value = rows;
         minesInput.value = minesCount;
     }
 
-    // ---- Инициализация массива мин ----
     function placeMines(safeR, safeC) {
         const total = rows * cols;
-        // Раскладываем мины через выборку уникальных индексов (быстро для 96*96 = 9216)
         const idxPool = new Uint32Array(total);
         for (let i = 0; i < total; i++) idxPool[i] = i;
-
-        // Исключаем "безопасную" клетку первого клика
         let poolSize = total;
         if (safeR >= 0 && safeC >= 0) {
             const safeIdx = safeR * cols + safeC;
-            // переносим safeIdx в конец и уменьшаем пул
-            const last = idxPool[poolSize - 1];
-            idxPool[poolSize - 1] = idxPool[safeIdx];
+            const last = idxPool[poolSize-1];
+            idxPool[poolSize-1] = idxPool[safeIdx];
             idxPool[safeIdx] = last;
             poolSize--;
         }
-
-        // Перемешиваем Фишером-Йетсом только нужную часть
         for (let i = 0; i < minesCount; i++) {
             const j = i + ((Math.random() * (poolSize - i)) | 0);
             const tmp = idxPool[i];
@@ -372,40 +279,37 @@
     function computeAdjacent() {
         adjacent.fill(0);
         for (let r = 0; r < rows; r++) {
-            const rowOff = r * cols;
             for (let c = 0; c < cols; c++) {
-                const idx = rowOff + c;
+                const idx = r*cols + c;
                 if (mine[idx]) continue;
                 let cnt = 0;
-                // Верхние соседи
-                if (r > 0) {
+                const rUp = r > 0, rDn = r < rows - 1;
+                const cLf = c > 0, cRt = c < cols - 1;
+                if (rUp) {
                     const up = idx - cols;
-                    if (mine[up - 1] && c > 0) cnt++;
+                    if (cLf && mine[up-1]) cnt++;
                     if (mine[up]) cnt++;
-                    if (mine[up + 1] && c < cols - 1) cnt++;
+                    if (cRt && mine[up+1]) cnt++;
                 }
-                // Боковые
-                if (c > 0 && mine[idx - 1]) cnt++;
-                if (c < cols - 1 && mine[idx + 1]) cnt++;
-                // Нижние соседи
-                if (r < rows - 1) {
+                if (cLf && mine[idx-1]) cnt++;
+                if (cRt && mine[idx+1]) cnt++;
+                if (rDn) {
                     const dn = idx + cols;
-                    if (mine[dn - 1] && c > 0) cnt++;
+                    if (cLf && mine[dn-1]) cnt++;
                     if (mine[dn]) cnt++;
-                    if (mine[dn + 1] && c < cols - 1) cnt++;
+                    if (cRt && mine[dn+1]) cnt++;
                 }
                 adjacent[idx] = cnt;
             }
         }
     }
 
-    // ---- Рендер ----
-    // Батчинг обновления через rAF (для мобилок, чтобы не дёргать DOM в цикле)
+    // Батч-рендер через rAF
     let rafPending = false;
-    const dirtyCells = new Set();
+    const dirtyCells = [];
 
     function markDirty(idx) {
-        dirtyCells.add(idx);
+        dirtyCells.push(idx);
         if (!rafPending) {
             rafPending = true;
             requestAnimationFrame(flushDirty);
@@ -414,134 +318,107 @@
 
     function flushDirty() {
         rafPending = false;
-        const it = dirtyCells;
-        for (const idx of it) {
-            updateCell(idx);
-        }
-        it.clear();
+        const arr = dirtyCells;
+        for (let i = 0; i < arr.length; i++) updateCell(arr[i]);
+        arr.length = 0;
     }
 
     function updateCell(idx) {
         const el = cellEls[idx];
         if (!el) return;
-        const rv = revealed[idx];
-        const fl = flagged[idx];
-        // Сбрасываем классы/текст/цвет аккуратно
-        let cls = 'cell';
-        let text = '';
-        let color = '';
-
+        const rv = revealed[idx], fl = flagged[idx], mn = mine[idx];
+        let cls = 'cell', text = '', color = '';
         if (rv) {
             cls += ' revealed';
-            if (mine[idx]) {
+            if (mn) {
                 cls += ' mine-exploded';
-                text = '✱';
-                color = '#d66';
+                text = '✱'; color = '#d66';
             } else {
                 const a = adjacent[idx];
-                if (a > 0) {
-                    text = a;
-                    color = NUM_COLORS[a - 1] || '#ccc';
-                }
+                if (a > 0) { text = a; color = NUM_COLORS[a-1] || '#ccc'; }
             }
         } else if (fl) {
-            cls += ' flagged';
-            text = '⚑';
+            cls += ' flagged'; text = '⚑';
         }
-
-        // Применяем только если изменилось (небольшая проверка)
         if (el.className !== cls) el.className = cls;
-        if (el.textContent !== text) el.textContent = text;
-        // Цвет меняем только когда текст не пустой
-        const desiredColor = color || '';
-        if (el.style.color !== desiredColor) el.style.color = desiredColor;
+        if (el.textContent !== text) el.textContent = String(text);
+        const c = color || '';
+        if (el.style.color !== c) el.style.color = c;
     }
 
+    // ---- Построение сетки ----
     function buildGrid() {
         totalCells = rows * cols;
-
-        // Массивы
         mine = new Uint8Array(totalCells);
         revealed = new Uint8Array(totalCells);
         flagged = new Uint8Array(totalCells);
         adjacent = new Uint8Array(totalCells);
         cellEls = new Array(totalCells);
 
-        // Настраиваем CSS grid
-        boardEl.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+        // Жёстко задаём и колонки, и строки — иначе grid схлопывается
+        boardEl.style.gridTemplateColumns = 'repeat(' + cols + ', 34px)';
+        boardEl.style.gridAutoRows = '34px';
+        // Учитываем мобильные размеры через медиа-запросы нельзя из JS, поэтому
+        // используем CSS-переменную для размера клетки:
+        const cellSize = window.innerWidth <= 380 ? 26 : (window.innerWidth <= 600 ? 30 : 34);
+        boardEl.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cellSize + 'px)';
+        boardEl.style.gridAutoRows = cellSize + 'px';
 
-        // Строим через DocumentFragment
         const frag = document.createDocumentFragment();
-        // Отключаем анимации на время массовой вставки
-        frag.appendChild(document.createComment('cells'));
-
         for (let i = 0; i < totalCells; i++) {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'cell';
-            // Используем data-idx для быстрого определения координат
             btn.dataset.i = i;
             cellEls[i] = btn;
             frag.appendChild(btn);
         }
-
         boardEl.innerHTML = '';
         boardEl.appendChild(frag);
-
-        // Делегирование событий: один слушатель на доску вместо тысяч
-        // Это критично для 96x96 = 9216 ячеек
-        attachDelegatedEvents();
     }
 
     // ---- Делегирование событий ----
-    let longPressTimer = null;
-    let longPressIdx = -1;
+    let longPressTimer = null, longPressIdx = -1;
     let touchStartX = 0, touchStartY = 0;
     let suppressClick = false;
 
-    function getCellIdxFromEvent(e) {
+    function getIdxFromEvent(e) {
         const t = e.target;
         if (!t || !t.dataset || t.dataset.i === undefined) return -1;
         return +t.dataset.i;
     }
 
     function attachDelegatedEvents() {
-        // Один раз на boardEl
         if (boardEl.__delegated) return;
         boardEl.__delegated = true;
 
-        // Правый клик (контекстное меню)
         boardEl.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            const idx = getCellIdxFromEvent(e);
-            if (idx < 0) return;
-            toggleFlag(idx);
+            const idx = getIdxFromEvent(e);
+            if (idx >= 0) toggleFlag(idx);
         });
 
-        // Левый клик
         boardEl.addEventListener('click', (e) => {
             if (suppressClick) { suppressClick = false; return; }
-            const idx = getCellIdxFromEvent(e);
+            const idx = getIdxFromEvent(e);
             if (idx < 0) return;
             e.preventDefault();
             handleOpen(idx);
         });
 
-        // Touch: долгое нажатие = флаг, короткое = открытие
         boardEl.addEventListener('touchstart', (e) => {
             if (e.touches.length > 1) return;
-            const touch = e.touches[0];
-            const idx = getCellIdxFromEvent(e);
+            const idx = getIdxFromEvent(e);
             if (idx < 0) return;
+            const t = e.touches[0];
             longPressIdx = idx;
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
+            touchStartX = t.clientX;
+            touchStartY = t.clientY;
             if (longPressTimer) clearTimeout(longPressTimer);
             longPressTimer = setTimeout(() => {
                 if (longPressIdx === idx) {
                     suppressClick = true;
                     toggleFlag(idx);
-                    // Небольшая вибрация для отклика (если поддерживается)
                     if (navigator.vibrate) navigator.vibrate(15);
                 }
                 longPressTimer = null;
@@ -554,7 +431,7 @@
                 const t = e.touches[0];
                 const dx = t.clientX - touchStartX;
                 const dy = t.clientY - touchStartY;
-                if (dx * dx + dy * dy > 100) { // сдвиг > 10px — отменяем долгое нажатие
+                if (dx*dx + dy*dy > 100) {
                     clearTimeout(longPressTimer);
                     longPressTimer = null;
                     longPressIdx = -1;
@@ -562,16 +439,9 @@
             }
         }, { passive: true });
 
-        boardEl.addEventListener('touchend', (e) => {
-            if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-            }
-            // Если долгое нажатие сработало — блокируем следующий click
-            if (suppressClick) {
-                // сброс произойдёт в click, но если click не придёт (например, тап отменён)
-                setTimeout(() => { suppressClick = false; }, 50);
-            }
+        boardEl.addEventListener('touchend', () => {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            if (suppressClick) setTimeout(() => { suppressClick = false; }, 50);
             longPressIdx = -1;
         }, { passive: true });
 
@@ -582,20 +452,17 @@
         }, { passive: true });
     }
 
-    // ---- Логика игры ----
+    // ---- Логика ----
     function toggleFlag(idx) {
         if (gameOver || gameWon) return;
         if (revealed[idx]) return;
         if (flagged[idx]) {
-            flagged[idx] = 0;
-            flagsPlaced--;
-            markDirty(idx);
+            flagged[idx] = 0; flagsPlaced--;
         } else {
             if (flagsPlaced >= minesCount) return;
-            flagged[idx] = 1;
-            flagsPlaced++;
-            markDirty(idx);
+            flagged[idx] = 1; flagsPlaced++;
         }
+        markDirty(idx);
         checkWin();
     }
 
@@ -603,30 +470,21 @@
         if (gameOver || gameWon) return;
         if (revealed[idx] || flagged[idx]) return;
 
-        // Первый ход — расставляем мины, исключая эту клетку
         if (!firstMoveDone) {
             firstMoveDone = true;
-            const r = (idx / cols) | 0;
-            const c = idx % cols;
-            placeMines(r, c);
+            placeMines((idx / cols) | 0, idx % cols);
             computeAdjacent();
         }
 
         if (mine[idx]) {
-            // Проигрыш
             gameOver = true;
-            revealed[idx] = 1;
-            // Открываем все мины
             for (let i = 0; i < totalCells; i++) {
-                if (mine[i] && !flagged[i] && !revealed[i]) revealed[i] = 1;
-                if (mine[i] && flagged[i] && !revealed[i]) revealed[i] = 1; // показываем и помеченные взорвавшиеся
+                if (mine[i] && !revealed[i]) { revealed[i] = 1; markDirty(i); }
             }
-            renderAll();
             statusMessage.textContent = 'Взрыв! Игра окончена.';
             return;
         }
 
-        // Открытие через итеративный стек
         const stack = [idx];
         while (stack.length) {
             const i = stack.pop();
@@ -634,62 +492,46 @@
             revealed[i] = 1;
             revealedCount++;
             markDirty(i);
-
             if (adjacent[i] === 0) {
-                const r = (i / cols) | 0;
-                const c = i % cols;
-                // 8 соседей
-                if (r > 0) {
-                    if (c > 0) stack.push(i - cols - 1);
+                const r = (i / cols) | 0, c = i % cols;
+                const rUp = r > 0, rDn = r < rows - 1;
+                const cLf = c > 0, cRt = c < cols - 1;
+                if (rUp) {
+                    if (cLf) stack.push(i - cols - 1);
                     stack.push(i - cols);
-                    if (c < cols - 1) stack.push(i - cols + 1);
+                    if (cRt) stack.push(i - cols + 1);
                 }
-                if (c > 0) stack.push(i - 1);
-                if (c < cols - 1) stack.push(i + 1);
-                if (r < rows - 1) {
-                    if (c > 0) stack.push(i + cols - 1);
+                if (cLf) stack.push(i - 1);
+                if (cRt) stack.push(i + 1);
+                if (rDn) {
+                    if (cLf) stack.push(i + cols - 1);
                     stack.push(i + cols);
-                    if (c < cols - 1) stack.push(i + cols + 1);
+                    if (cRt) stack.push(i + cols + 1);
                 }
             }
         }
-
         checkWin();
-    }
-
-    function renderAll() {
-        for (let i = 0; i < totalCells; i++) updateCell(i);
     }
 
     function checkWin() {
         if (gameOver || gameWon) return;
-        const safeTotal = totalCells - minesCount;
-        if (revealedCount !== safeTotal) return;
-
-        // Все мины помечены?
-        let flagsOk = flagsPlaced === minesCount;
-        if (flagsOk) {
+        if (revealedCount !== totalCells - minesCount) return;
+        let ok = flagsPlaced === minesCount;
+        if (ok) {
             for (let i = 0; i < totalCells; i++) {
-                if (mine[i] && !flagged[i]) { flagsOk = false; break; }
+                if (mine[i] && !flagged[i]) { ok = false; break; }
             }
         }
-        if (!flagsOk) return;
-
-        gameWon = true;
-        gameOver = true; // блокируем ввод
+        if (!ok) return;
+        gameWon = true; gameOver = true;
         statusMessage.textContent = 'Победа! Все мины обезврежены.';
         bosniaFlag.classList.remove('hidden');
-        // Небольшая задержка — даём UI отрисоваться
-        setTimeout(play8Bit, 60);
+        setTimeout(play8Bit, 80);
     }
 
-    // ---- Новая игра ----
     function newGame() {
         readSettings();
-        if (minesCount > cols * rows - 1) {
-            minesCount = cols * rows - 1;
-            minesInput.value = minesCount;
-        }
+        if (minesCount > cols*rows - 1) { minesCount = cols*rows - 1; minesInput.value = minesCount; }
         gameOver = false; gameWon = false;
         flagsPlaced = 0; revealedCount = 0;
         firstMoveDone = false;
@@ -698,15 +540,14 @@
         audioBusy = false;
         if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
         suppressClick = false;
-        dirtyCells.clear();
+        dirtyCells.length = 0;
         rafPending = false;
 
         buildGrid();
+        attachDelegatedEvents();
     }
 
-    // ---- Обработчики настроек ----
     newGameBtn.addEventListener('click', newGame);
-
     [widthInput, heightInput, minesInput].forEach(inp => {
         inp.addEventListener('change', function() {
             let v = parseInt(this.value, 10);
@@ -716,16 +557,8 @@
         });
     });
 
-    // Старт
-    window.addEventListener('load', () => {
-        readSettings();
-        newGame();
-    });
-
-    // Отключаем контекстное меню на контейнере (правый клик = флаг)
     boardContainer.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // Не даём зумить двойным тапом на iOS
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function(e) {
         const now = Date.now();
@@ -733,7 +566,9 @@
         lastTouchEnd = now;
     }, { passive: false });
 
-    // При изменении размера окна — не перестраиваем, layout сам подстроится
+    // Старт
+    readSettings();
+    newGame();
 })();
 </script>
 </body>
