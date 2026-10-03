@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>Минималистичный сапёр · Босния</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1e1e1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            padding: 12px;
+            overflow: hidden;
+        }
+        .game-wrapper {
+            background: #2d2d2d;
+            border-radius: 24px;
+            padding: 20px 20px 24px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.7), inset 0 0 0 1px #3f3f3f;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            max-height: 100vh;
+        }
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 18px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: #e0e0e0;
+            background: #262626;
+            padding: 12px 18px;
+            border-radius: 60px;
+            box-shadow: inset 0 2px 5px #0a0a0a;
+            flex-shrink: 0;
+        }
+        .settings label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            color: #c0c0c0;
+        }
+        .settings input {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            color: white;
+            font-weight: 600;
+            width: 68px;
+            padding: 8px 10px;
+            border-radius: 40px;
+            font-size: 15px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.15s, background 0.15s;
+            box-shadow: inset 0 2px 6px #0a0a0a;
+        }
+        .settings input:focus {
+            border-color: #6a9c78;
+            background: #1a2a1f;
+        }
+        .settings button {
+            background: #3a5e4b;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            box-shadow: 0 6px 0 #1d2f24, 0 8px 12px rgba(0,0,0,0.4);
+            transform: translateY(-2px);
+            border: 1px solid #5c8b70;
+        }
+        .settings button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1d2f24, 0 5px 10px rgba(0,0,0,0.4);
+        }
+        .board-container {
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+            flex: 1 1 auto;
+            min-height: 0;
+            border-radius: 16px;
+            padding: 6px;
+            background: #202020;
+            box-shadow: inset 0 0 0 1px #3a3a3a, inset 0 8px 12px rgba(0,0,0,0.6);
+            -webkit-overflow-scrolling: touch;
+            contain: strict;
+        }
+        .board {
+            display: grid;
+            gap: 3px;
+            background: #2d2d2d;
+            padding: 3px;
+            border-radius: 10px;
+            width: max-content;
+            height: max-content;
+            margin: auto;
+        }
+        .cell {
+            width: 36px;
+            height: 36px;
+            background: #404040;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: #ddd;
+            box-shadow: 0 3px 0 #1e1e1e, 0 4px 8px rgba(0,0,0,0.4);
+            transition: transform 0.05s, box-shadow 0.05s, background 0.1s, color 0.1s;
+            cursor: pointer;
+            border: none;
+            font-family: 'Segoe UI', monospace;
+            line-height: 1;
+            transform: translateY(-1px);
+            padding: 0;
+            will-change: transform;
+            contain: layout style paint;
+        }
+        .cell:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #1e1e1e, 0 3px 6px rgba(0,0,0,0.5);
+        }
+        .cell.revealed {
+            background: #2a2a2a;
+            box-shadow: inset 0 2px 5px #0f0f0f, 0 1px 0 #3a3a3a;
+            transform: translateY(1px);
+            color: #b0b0b0;
+            cursor: default;
+            font-size: 17px;
+        }
+        .cell.revealed:active {
+            transform: translateY(1px);
+            box-shadow: inset 0 2px 5px #0f0f0f;
+        }
+        .cell.flagged {
+            background: #3d3d2a;
+            box-shadow: 0 3px 0 #1e1e1e, 0 0 0 1px #b8860b inset;
+            font-size: 22px;
+            color: #e6b422;
+        }
+        .cell.mine-exploded {
+            background: #6b2e2e;
+            box-shadow: 0 3px 0 #3a1a1a, 0 0 0 2px #b33 inset;
+            color: #ffb3b3;
+        }
+        .bosnia-flag {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 18px;
+            animation: fadeIn 0.5s ease;
+            flex-shrink: 0;
+        }
+        .flag-svg {
+            width: 160px;
+            height: auto;
+            filter: drop-shadow(0 12px 15px rgba(0,0,0,0.6));
+            border-radius: 6px;
+            box-shadow: 0 0 0 2px #4f4f4f;
+        }
+        .flag-caption {
+            color: #c0c0c0;
+            font-size: 15px;
+            margin-top: 8px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .hidden {
+            display: none !important;
+        }
+        @media (max-width: 600px) {
+            .cell { width: 32px; height: 32px; font-size: 16px; border-radius: 6px; }
+            .board { gap: 2px; padding: 2px; }
+            .settings { padding: 10px 12px; gap: 8px; }
+            .settings label { font-size: 13px; }
+            .settings input { width: 58px; padding: 6px 8px; font-size: 14px; }
+            .settings button { padding: 8px 18px; font-size: 14px; }
+            .flag-svg { width: 130px; }
+            .game-wrapper { padding: 14px 14px 18px; border-radius: 18px; }
+        }
+        @media (max-width: 380px) {
+            .cell { width: 28px; height: 28px; font-size: 14px; }
+            .flag-svg { width: 110px; }
+        }
+        .status-message {
+            text-align: center;
+            color: #aaa;
+            margin: 10px 0 0;
+            font-size: 15px;
+            min-height: 22px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="settings">
+        <label>Ширина <input type="number" id="widthInput" min="2" max="96" value="9" inputmode="numeric"></label>
+        <label>Высота <input type="number" id="heightInput" min="2" max="96" value="9" inputmode="numeric"></label>
+        <label>Мин <input type="number" id="minesInput" min="1" max="95" value="10" inputmode="numeric"></label>
+        <button id="newGameBtn" type="button">Новая игра</button>
+    </div>
+    <div class="board-container" id="boardContainer">
+        <div id="board" class="board"></div>
+    </div>
+    <div id="statusMessage" class="status-message"></div>
+    <div id="bosniaFlag" class="bosnia-flag hidden">
+        <svg class="flag-svg" viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="480" height="240" fill="#002F6C"/>
+            <path d="M120 0 L480 240 L480 0 L120 0 Z" fill="#FECB00"/>
+            <g fill="#FFFFFF">
+                <path d="M140 24 L152 12 L164 24 L152 36 Z"/>
+                <path d="M176 48 L188 36 L200 48 L188 60 Z"/>
+                <path d="M212 72 L224 60 L236 72 L224 84 Z"/>
+                <path d="M248 96 L260 84 L272 96 L260 108 Z"/>
+                <path d="M284 120 L296 108 L308 120 L296 132 Z"/>
+                <path d="M320 144 L332 132 L344 144 L332 156 Z"/>
+                <path d="M356 168 L368 156 L380 168 L368 180 Z"/>
+                <path d="M392 192 L404 180 L416 192 L404 204 Z"/>
+            </g>
+        </svg>
+        <div class="flag-caption">Босния и Герцеговина</div>
+    </div>
+</div>
+<script>
+(function(){
+    'use strict';
+
+    // ---- DOM ----
+    const boardEl = document.getElementById('board');
+    const boardContainer = document.getElementById('boardContainer');
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+    const minesInput = document.getElementById('minesInput');
+    const newGameBtn = document.getElementById('newGameBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const bosniaFlag = document.getElementById('bosniaFlag');
+
+    // ---- Состояние ----
+    let cols = 9, rows = 9, minesCount = 10;
+    let mine = null;        // Uint8Array: 1 = мина
+    let revealed = null;    // Uint8Array: 1 = открыта
+    let flagged = null;     // Uint8Array: 1 = флаг
+    let adjacent = null;    // Uint8Array: число соседних мин
+    let cellEls = null;     // Array<HTMLButtonElement> — DOM-элементы ячеек
+
+    let gameOver = false, gameWon = false;
+    let flagsPlaced = 0, revealedCount = 0;
+    let totalCells = 0;
+    let firstMoveDone = false;
+
+    // ---- Цвета цифр (статичный массив) ----
+    const NUM_COLORS = ['#6a8caf', '#7f9f7f', '#b38b6d', '#9b6b8c', '#8f6b5e', '#5f7e8c', '#9e8e6b', '#9e6b6b'];
+
+    // ---- Аудио ----
+    let audioCtx = null;
+    let audioBusy = false;
+
+    const MELODY = [
+        [523.25, 0.12], [659.25, 0.12], [783.99, 0.12], [1046.50, 0.18],
+        [783.99, 0.12], [1046.50, 0.25], [659.25, 0.12], [783.99, 0.12],
+        [1046.50, 0.18], [1318.51, 0.30], [1046.50, 0.12], [1318.51, 0.40]
+    ];
+
+    function ensureAudio() {
+        if (!audioCtx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            audioCtx = new AC();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function play8Bit() {
+        if (audioBusy) return;
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        audioBusy = true;
+
+        let t = ctx.currentTime + 0.02;
+        const master = ctx.createGain();
+        master.gain.value = 0.10;
+        master.connect(ctx.destination);
+
+        for (let i = 0; i < MELODY.length; i++) {
+            const freq = MELODY[i][0], dur = MELODY[i][1];
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, t);
+            g.gain.setValueAtTime(0.9, t);
+            g.gain.setValueAtTime(0.9, t + dur - 0.02);
+            g.gain.linearRampToValueAtTime(0.0001, t + dur);
+            osc.connect(g); g.connect(master);
+            osc.start(t); osc.stop(t + dur);
+            t += dur;
+        }
+        const total = t - ctx.currentTime;
+        setTimeout(() => { audioBusy = false; }, total * 1000 + 150);
+    }
+
+    // ---- Утилиты ----
+    function clamp(v, min, max) { return v < min ? min : (v > max ? max : v); }
+
+    function readSettings() {
+        cols = clamp(parseInt(widthInput.value, 10) || 9, 2, 96);
+        rows = clamp(parseInt(heightInput.value, 10) || 9, 2, 96);
+        const maxMines = Math.min(95, cols * rows - 1);
+        minesCount = clamp(parseInt(minesInput.value, 10) || 10, 1, maxMines);
+        widthInput.value = cols;
+        heightInput.value = rows;
+        minesInput.value = minesCount;
+    }
+
+    // ---- Инициализация массива мин ----
+    function placeMines(safeR, safeC) {
+        const total = rows * cols;
+        // Раскладываем мины через выборку уникальных индексов (быстро для 96*96 = 9216)
+        const idxPool = new Uint32Array(total);
+        for (let i = 0; i < total; i++) idxPool[i] = i;
+
+        // Исключаем "безопасную" клетку первого клика
+        let poolSize = total;
+        if (safeR >= 0 && safeC >= 0) {
+            const safeIdx = safeR * cols + safeC;
+            // переносим safeIdx в конец и уменьшаем пул
+            const last = idxPool[poolSize - 1];
+            idxPool[poolSize - 1] = idxPool[safeIdx];
+            idxPool[safeIdx] = last;
+            poolSize--;
+        }
+
+        // Перемешиваем Фишером-Йетсом только нужную часть
+        for (let i = 0; i < minesCount; i++) {
+            const j = i + ((Math.random() * (poolSize - i)) | 0);
+            const tmp = idxPool[i];
+            idxPool[i] = idxPool[j];
+            idxPool[j] = tmp;
+            mine[idxPool[i]] = 1;
+        }
+    }
+
+    function computeAdjacent() {
+        adjacent.fill(0);
+        for (let r = 0; r < rows; r++) {
+            const rowOff = r * cols;
+            for (let c = 0; c < cols; c++) {
+                const idx = rowOff + c;
+                if (mine[idx]) continue;
+                let cnt = 0;
+                // Верхние соседи
+                if (r > 0) {
+                    const up = idx - cols;
+                    if (mine[up - 1] && c > 0) cnt++;
+                    if (mine[up]) cnt++;
+                    if (mine[up + 1] && c < cols - 1) cnt++;
+                }
+                // Боковые
+                if (c > 0 && mine[idx - 1]) cnt++;
+                if (c < cols - 1 && mine[idx + 1]) cnt++;
+                // Нижние соседи
+                if (r < rows - 1) {
+                    const dn = idx + cols;
+                    if (mine[dn - 1] && c > 0) cnt++;
+                    if (mine[dn]) cnt++;
+                    if (mine[dn + 1] && c < cols - 1) cnt++;
+                }
+                adjacent[idx] = cnt;
+            }
+        }
+    }
+
+    // ---- Рендер ----
+    // Батчинг обновления через rAF (для мобилок, чтобы не дёргать DOM в цикле)
+    let rafPending = false;
+    const dirtyCells = new Set();
+
+    function markDirty(idx) {
+        dirtyCells.add(idx);
+        if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(flushDirty);
+        }
+    }
+
+    function flushDirty() {
+        rafPending = false;
+        const it = dirtyCells;
+        for (const idx of it) {
+            updateCell(idx);
+        }
+        it.clear();
+    }
+
+    function updateCell(idx) {
+        const el = cellEls[idx];
+        if (!el) return;
+        const rv = revealed[idx];
+        const fl = flagged[idx];
+        // Сбрасываем классы/текст/цвет аккуратно
+        let cls = 'cell';
+        let text = '';
+        let color = '';
+
+        if (rv) {
+            cls += ' revealed';
+            if (mine[idx]) {
+                cls += ' mine-exploded';
+                text = '✱';
+                color = '#d66';
+            } else {
+                const a = adjacent[idx];
+                if (a > 0) {
+                    text = a;
+                    color = NUM_COLORS[a - 1] || '#ccc';
+                }
+            }
+        } else if (fl) {
+            cls += ' flagged';
+            text = '⚑';
+        }
+
+        // Применяем только если изменилось (небольшая проверка)
+        if (el.className !== cls) el.className = cls;
+        if (el.textContent !== text) el.textContent = text;
+        // Цвет меняем только когда текст не пустой
+        const desiredColor = color || '';
+        if (el.style.color !== desiredColor) el.style.color = desiredColor;
+    }
+
+    function buildGrid() {
+        totalCells = rows * cols;
+
+        // Массивы
+        mine = new Uint8Array(totalCells);
+        revealed = new Uint8Array(totalCells);
+        flagged = new Uint8Array(totalCells);
+        adjacent = new Uint8Array(totalCells);
+        cellEls = new Array(totalCells);
+
+        // Настраиваем CSS grid
+        boardEl.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+
+        // Строим через DocumentFragment
+        const frag = document.createDocumentFragment();
+        // Отключаем анимации на время массовой вставки
+        frag.appendChild(document.createComment('cells'));
+
+        for (let i = 0; i < totalCells; i++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cell';
+            // Используем data-idx для быстрого определения координат
+            btn.dataset.i = i;
+            cellEls[i] = btn;
+            frag.appendChild(btn);
+        }
+
+        boardEl.innerHTML = '';
+        boardEl.appendChild(frag);
+
+        // Делегирование событий: один слушатель на доску вместо тысяч
+        // Это критично для 96x96 = 9216 ячеек
+        attachDelegatedEvents();
+    }
+
+    // ---- Делегирование событий ----
+    let longPressTimer = null;
+    let longPressIdx = -1;
+    let touchStartX = 0, touchStartY = 0;
+    let suppressClick = false;
+
+    function getCellIdxFromEvent(e) {
+        const t = e.target;
+        if (!t || !t.dataset || t.dataset.i === undefined) return -1;
+        return +t.dataset.i;
+    }
+
+    function attachDelegatedEvents() {
+        // Один раз на boardEl
+        if (boardEl.__delegated) return;
+        boardEl.__delegated = true;
+
+        // Правый клик (контекстное меню)
+        boardEl.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const idx = getCellIdxFromEvent(e);
+            if (idx < 0) return;
+            toggleFlag(idx);
+        });
+
+        // Левый клик
+        boardEl.addEventListener('click', (e) => {
+            if (suppressClick) { suppressClick = false; return; }
+            const idx = getCellIdxFromEvent(e);
+            if (idx < 0) return;
+            e.preventDefault();
+            handleOpen(idx);
+        });
+
+        // Touch: долгое нажатие = флаг, короткое = открытие
+        boardEl.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) return;
+            const touch = e.touches[0];
+            const idx = getCellIdxFromEvent(e);
+            if (idx < 0) return;
+            longPressIdx = idx;
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            if (longPressTimer) clearTimeout(longPressTimer);
+            longPressTimer = setTimeout(() => {
+                if (longPressIdx === idx) {
+                    suppressClick = true;
+                    toggleFlag(idx);
+                    // Небольшая вибрация для отклика (если поддерживается)
+                    if (navigator.vibrate) navigator.vibrate(15);
+                }
+                longPressTimer = null;
+                longPressIdx = -1;
+            }, 420);
+        }, { passive: true });
+
+        boardEl.addEventListener('touchmove', (e) => {
+            if (longPressTimer && e.touches.length) {
+                const t = e.touches[0];
+                const dx = t.clientX - touchStartX;
+                const dy = t.clientY - touchStartY;
+                if (dx * dx + dy * dy > 100) { // сдвиг > 10px — отменяем долгое нажатие
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                    longPressIdx = -1;
+                }
+            }
+        }, { passive: true });
+
+        boardEl.addEventListener('touchend', (e) => {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            // Если долгое нажатие сработало — блокируем следующий click
+            if (suppressClick) {
+                // сброс произойдёт в click, но если click не придёт (например, тап отменён)
+                setTimeout(() => { suppressClick = false; }, 50);
+            }
+            longPressIdx = -1;
+        }, { passive: true });
+
+        boardEl.addEventListener('touchcancel', () => {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            longPressIdx = -1;
+            suppressClick = false;
+        }, { passive: true });
+    }
+
+    // ---- Логика игры ----
+    function toggleFlag(idx) {
+        if (gameOver || gameWon) return;
+        if (revealed[idx]) return;
+        if (flagged[idx]) {
+            flagged[idx] = 0;
+            flagsPlaced--;
+            markDirty(idx);
+        } else {
+            if (flagsPlaced >= minesCount) return;
+            flagged[idx] = 1;
+            flagsPlaced++;
+            markDirty(idx);
+        }
+        checkWin();
+    }
+
+    function handleOpen(idx) {
+        if (gameOver || gameWon) return;
+        if (revealed[idx] || flagged[idx]) return;
+
+        // Первый ход — расставляем мины, исключая эту клетку
+        if (!firstMoveDone) {
+            firstMoveDone = true;
+            const r = (idx / cols) | 0;
+            const c = idx % cols;
+            placeMines(r, c);
+            computeAdjacent();
+        }
+
+        if (mine[idx]) {
+            // Проигрыш
+            gameOver = true;
+            revealed[idx] = 1;
+            // Открываем все мины
+            for (let i = 0; i < totalCells; i++) {
+                if (mine[i] && !flagged[i] && !revealed[i]) revealed[i] = 1;
+                if (mine[i] && flagged[i] && !revealed[i]) revealed[i] = 1; // показываем и помеченные взорвавшиеся
+            }
+            renderAll();
+            statusMessage.textContent = 'Взрыв! Игра окончена.';
+            return;
+        }
+
+        // Открытие через итеративный стек
+        const stack = [idx];
+        while (stack.length) {
+            const i = stack.pop();
+            if (revealed[i] || flagged[i]) continue;
+            revealed[i] = 1;
+            revealedCount++;
+            markDirty(i);
+
+            if (adjacent[i] === 0) {
+                const r = (i / cols) | 0;
+                const c = i % cols;
+                // 8 соседей
+                if (r > 0) {
+                    if (c > 0) stack.push(i - cols - 1);
+                    stack.push(i - cols);
+                    if (c < cols - 1) stack.push(i - cols + 1);
+                }
+                if (c > 0) stack.push(i - 1);
+                if (c < cols - 1) stack.push(i + 1);
+                if (r < rows - 1) {
+                    if (c > 0) stack.push(i + cols - 1);
+                    stack.push(i + cols);
+                    if (c < cols - 1) stack.push(i + cols + 1);
+                }
+            }
+        }
+
+        checkWin();
+    }
+
+    function renderAll() {
+        for (let i = 0; i < totalCells; i++) updateCell(i);
+    }
+
+    function checkWin() {
+        if (gameOver || gameWon) return;
+        const safeTotal = totalCells - minesCount;
+        if (revealedCount !== safeTotal) return;
+
+        // Все мины помечены?
+        let flagsOk = flagsPlaced === minesCount;
+        if (flagsOk) {
+            for (let i = 0; i < totalCells; i++) {
+                if (mine[i] && !flagged[i]) { flagsOk = false; break; }
+            }
+        }
+        if (!flagsOk) return;
+
+        gameWon = true;
+        gameOver = true; // блокируем ввод
+        statusMessage.textContent = 'Победа! Все мины обезврежены.';
+        bosniaFlag.classList.remove('hidden');
+        // Небольшая задержка — даём UI отрисоваться
+        setTimeout(play8Bit, 60);
+    }
+
+    // ---- Новая игра ----
+    function newGame() {
+        readSettings();
+        if (minesCount > cols * rows - 1) {
+            minesCount = cols * rows - 1;
+            minesInput.value = minesCount;
+        }
+        gameOver = false; gameWon = false;
+        flagsPlaced = 0; revealedCount = 0;
+        firstMoveDone = false;
+        bosniaFlag.classList.add('hidden');
+        statusMessage.textContent = '';
+        audioBusy = false;
+        if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        suppressClick = false;
+        dirtyCells.clear();
+        rafPending = false;
+
+        buildGrid();
+    }
+
+    // ---- Обработчики настроек ----
+    newGameBtn.addEventListener('click', newGame);
+
+    [widthInput, heightInput, minesInput].forEach(inp => {
+        inp.addEventListener('change', function() {
+            let v = parseInt(this.value, 10);
+            if (isNaN(v)) v = parseInt(this.min, 10);
+            v = clamp(v, parseInt(this.min, 10), parseInt(this.max, 10));
+            this.value = v;
+        });
+    });
+
+    // Старт
+    window.addEventListener('load', () => {
+        readSettings();
+        newGame();
+    });
+
+    // Отключаем контекстное меню на контейнере (правый клик = флаг)
+    boardContainer.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Не даём зумить двойным тапом на iOS
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(e) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
+    }, { passive: false });
+
+    // При изменении размера окна — не перестраиваем, layout сам подстроится
+})();
+</script>
+</body>
+</html>
